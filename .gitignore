@@ -1,0 +1,4 @@
+/bin
+/.gobuild 
+firmware-secure.h
+.pioenvs
