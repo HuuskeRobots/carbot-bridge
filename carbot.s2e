@@ -1,0 +1,10 @@
+{
+    "extensionName": "CarBot",
+    "extensionPort": 26153,
+    "blockSpecs": [
+        [ "", "Motor %m.motorAction", "motor", "stop"]
+    ],
+    "menus": {
+        "motorAction": ["stop","vooruit","achteruit", "links", "rechts"]
+    }
+}

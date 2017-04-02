@@ -44,14 +44,14 @@ void handleRoot()
 	</script>\
   </head>\
   <body>\
-    <h1>Hello from " + robotName + "</h1>\
+    <h1>Hallo vanaf " + robotName + "</h1>\
     <p>Uptime: " + temp + "</p>\
 	<div>\
 	  <a href='javascript:motor(\"stop\")'>Stop</a>\
-	  <a href='javascript:motor(\"forward\")'>Forward</a>\
-	  <a href='javascript:motor(\"backward\")'>Backward</a>\
-	  <a href='javascript:motor(\"turnleft\")'>Turn left</a>\
-	  <a href='javascript:motor(\"turnright\")'>Turn right</a>\
+	  <a href='javascript:motor(\"vooruit\")'>Vooruit</a>\
+	  <a href='javascript:motor(\"achteruit\")'>Achteruit</a>\
+	  <a href='javascript:motor(\"links\")'>Links</a>\
+	  <a href='javascript:motor(\"rechts\")'>Rechts</a>\
 	</div>\
   </body>\
 </html>";
@@ -121,6 +121,10 @@ void handleMotorTurnLeft() {
     server.send(200, "text/plain", "ok");
 }
 
+void handlePoll() {
+    server.send(200, "text/plain", "");
+}
+
 void setup(void)
 {
     char tmp[8];
@@ -166,14 +170,13 @@ void setup(void)
     }
 
     server.on("/", handleRoot);
-    server.on("/inline", []() {
-	server.send(200, "text/plain", "this works as well");
-    });
+    server.on("/poll", handlePoll);
+    server.on("/reset_all", handleMotorStop);
     server.on("/motor/stop", handleMotorStop);
-    server.on("/motor/forward", handleMotorForward);
-    server.on("/motor/backward", handleMotorBackward);
-    server.on("/motor/turnleft", handleMotorTurnLeft);
-    server.on("/motor/turnright", handleMotorTurnRight);
+    server.on("/motor/vooruit", handleMotorForward);
+    server.on("/motor/achteruit", handleMotorBackward);
+    server.on("/motor/links", handleMotorTurnLeft);
+    server.on("/motor/rechts", handleMotorTurnRight);
     server.onNotFound(handleNotFound);
     server.begin();
     Serial.println("HTTP server started");
