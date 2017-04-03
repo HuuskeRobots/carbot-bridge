@@ -13,6 +13,7 @@
 String robotName;
 ESP8266WebServer server(80);
 const int led = 13;
+const int activityLed = 13;
 const int motorA_BW = 5; // D1 A-IA Backward
 const int motorA_FW = 4; // D2 A-IB Forward
 const int motorB_BW = 0; // D3 B-IA Backward
@@ -122,7 +123,9 @@ void handleMotorTurnLeft() {
 }
 
 void handlePoll() {
+    digitalWrite(activityLed, 1);
     server.send(200, "text/plain", "");
+    digitalWrite(activityLed, 0);
 }
 
 void setup(void)
@@ -138,6 +141,7 @@ void setup(void)
     pinMode(motorA_FW, OUTPUT);
     pinMode(motorB_BW, OUTPUT);
     pinMode(motorB_FW, OUTPUT);
+    pinMode(activityLed, OUTPUT);
     digitalWrite(motorA_BW, 0);
     digitalWrite(motorA_FW, 0);
     digitalWrite(motorB_BW, 0);
