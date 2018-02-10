@@ -1,4 +1,7 @@
 /bin
-/.gobuild 
+/.gobuild
 firmware-secure.h
 .pioenvs
+.piolibdeps
+.vscode/c_cpp_properties.json
+.vscode/launch.json

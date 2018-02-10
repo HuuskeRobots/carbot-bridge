@@ -17,7 +17,18 @@ const int activityLed = 13;
 const int motorA_BW = 5; // D1 A-IA Backward
 const int motorA_FW = 4; // D2 A-IB Forward
 const int motorB_BW = 0; // D3 B-IA Backward
-const int motorB_FW = 2; // D4 B-IB Forward
+const int motorB_FW = D7; // D4 B-IB Forward
+
+#define TRIGGER D5
+#define ECHO    D6
+
+const int modeStop = 0;
+const int modeForward = 1;
+const int modeBackward = 2;
+const int modeLeft = 3;
+const int modeRight = 4;
+
+int mode = modeStop;
 
 void handleRoot()
 {
@@ -82,43 +93,84 @@ void handleNotFound()
     digitalWrite(led, 0);
 }
 
-void handleMotorStop() {
+void motorStop() {
     digitalWrite(motorA_BW, 0);
     digitalWrite(motorA_FW, 0);
     digitalWrite(motorB_BW, 0);
     digitalWrite(motorB_FW, 0);	
+}
+
+void motorForward() {
+    digitalWrite(motorA_BW, 0);
+    digitalWrite(motorA_FW, 1);
+    digitalWrite(motorB_BW, 0);
+    digitalWrite(motorB_FW, 1);	
+}
+
+void motorBackward() {
+    digitalWrite(motorA_BW, 1);
+    digitalWrite(motorA_FW, 0);
+    digitalWrite(motorB_BW, 1);
+    digitalWrite(motorB_FW, 0);	
+}
+
+void motorTurnRight() {
+    digitalWrite(motorA_BW, 1);
+    digitalWrite(motorA_FW, 0);
+    digitalWrite(motorB_BW, 0);
+    digitalWrite(motorB_FW, 1);	
+}
+
+void motorTurnLeft() {
+    digitalWrite(motorA_BW, 0);
+    digitalWrite(motorA_FW, 1);
+    digitalWrite(motorB_BW, 1);
+    digitalWrite(motorB_FW, 0);	
+}
+
+void detectObstacle() {
+    long duration, distance;
+    digitalWrite(TRIGGER, LOW);  
+    delayMicroseconds(2); 
+
+    digitalWrite(TRIGGER, HIGH);
+    delayMicroseconds(10); 
+
+    digitalWrite(TRIGGER, LOW);
+    duration = pulseIn(ECHO, HIGH);
+    distance = (duration/2) / 29.1;
+
+    if (distance < 20) {
+        mode = modeStop;
+        motorStop();
+    }
+    //Serial.print(distance);
+    //Serial.println(" cm");
+//    delay(1000);
+}
+
+void handleMotorStop() {
+    mode = modeStop;
     server.send(200, "text/plain", "ok");
 }
 
 void handleMotorForward() {
-    digitalWrite(motorA_BW, 0);
-    digitalWrite(motorA_FW, 1);
-    digitalWrite(motorB_BW, 0);
-    digitalWrite(motorB_FW, 1);	
+    mode = modeForward;
     server.send(200, "text/plain", "ok");
 }
 
 void handleMotorBackward() {
-    digitalWrite(motorA_BW, 1);
-    digitalWrite(motorA_FW, 0);
-    digitalWrite(motorB_BW, 1);
-    digitalWrite(motorB_FW, 0);	
+    mode = modeBackward;
     server.send(200, "text/plain", "ok");
 }
 
 void handleMotorTurnRight() {
-    digitalWrite(motorA_BW, 1);
-    digitalWrite(motorA_FW, 0);
-    digitalWrite(motorB_BW, 0);
-    digitalWrite(motorB_FW, 1);	
+    mode = modeRight;
     server.send(200, "text/plain", "ok");
 }
 
 void handleMotorTurnLeft() {
-    digitalWrite(motorA_BW, 0);
-    digitalWrite(motorA_FW, 1);
-    digitalWrite(motorB_BW, 1);
-    digitalWrite(motorB_FW, 0);	
+    mode = modeLeft;
     server.send(200, "text/plain", "ok");
 }
 
@@ -142,6 +194,8 @@ void setup(void)
     pinMode(motorB_BW, OUTPUT);
     pinMode(motorB_FW, OUTPUT);
     pinMode(activityLed, OUTPUT);
+    pinMode(TRIGGER, OUTPUT);
+    pinMode(ECHO, INPUT);
     digitalWrite(motorA_BW, 0);
     digitalWrite(motorA_FW, 0);
     digitalWrite(motorB_BW, 0);
@@ -186,7 +240,46 @@ void setup(void)
     Serial.println("HTTP server started");
 }
 
+int iteration = 0;
+
 void loop(void)
 {
+    if (iteration == 2) {
+        if (mode == modeForward) {
+            detectObstacle();
+        }
+        iteration = 0;
+    } else {
+        iteration++;
+    }
     server.handleClient();
+    switch (mode) {
+        case modeStop:
+            motorStop();
+            break;
+        case modeForward:
+            motorForward();
+            delay(3);
+            motorStop();
+            delay(2);
+            break;
+        case modeBackward:
+            motorBackward();
+            delay(3);
+            motorStop();
+            delay(2);
+            break;
+        case modeLeft:
+            motorTurnLeft();
+            delay(3);
+            motorStop();
+            delay(2);
+            break;
+        case modeRight:
+            motorTurnRight();
+            delay(3);
+            motorStop();
+            delay(2);
+            break;
+    }
 }
